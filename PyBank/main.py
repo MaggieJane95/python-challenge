@@ -55,10 +55,10 @@ output = (
  f"Financial Analysis\n" 
  f"-----------------------\n"
  f"Total Months: {total_months}\n"
- f"Total: {net_total_profit_losses}\n"
- f"Average Change: {average_change_profit_losses}\n"
- f"Greatest Increase in Profits:{greatest_month} {greatest_increase}\n"
- f"Greatest Decrease in Profits: {least_month} {greatest_decrease}\n"
+ f"Total: ${net_total_profit_losses}\n"
+ f"Average Change: ${average_change_profit_losses:.2f}\n"
+ f"Greatest Increase in Profits: {greatest_month} $({greatest_increase})\n"
+ f"Greatest Decrease in Profits: {least_month} $({greatest_decrease})\n"
     
 )
 
