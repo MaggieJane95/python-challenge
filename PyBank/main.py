@@ -1,93 +1,76 @@
-import csv
 import os
-csvpath = os.path.join( 'Resources', 'budget_data.csv')
+import csv
 
-#Define my Variables
-months = 0
-list_months_changes = []
-net_total_amount = 0
-net_changes_profit_losses = []
-greatest_increase = ["", 0]
-greatest_decrease = ["", 10000000]
+#Create path to CSV
+budget_data_path = os.path.join('Resources', 'budget_data.csv')
+txtpath = os.path.join('Analysis', "budget_analysis.txt") 
 
-# Read my file
-with open(csvpath) as budget_data:
-    read_file = csv.reader(budget_data)
-    header = next(read_file)
-    first_row = next(read_file)
+#Create my Variables
+total_months = 0
+net_total_profit_losses = 0
+changes_profit_losses = []
+month_profit_losses = []
+previous_change_profit_losses = 0
 
-    months = months + 1
-    net_total_amount = int(first_row[1]) + net_total_amount
-    net_previous_total_amount = int(first_row[1])
+#Read my CSV File
+with open(budget_data_path) as budget_data:
+    csvreader = csv.reader(budget_data, delimiter=',')
+    csv_header = next(csvreader)
+    first = next(csvreader)
 
-    for row in read_file:
-        months = months + 1
-        net_total_amount = int(row[1]) + net_total_amount
-        change = int(row[1]) - net_previous_total_amount
-        net_changes_profit_losses.append(change)
-       
+    data = list(csvreader)
 
-        #list_months_changes.append(row[0])
-        list_months_changes += [row[0]]
-        net_previous_total_amount = int(row[1])
+#The total number of months / Net proft/losses included in the dataset
+    # for row in data:
+    #     total_months += 1
+    #     net_total_profit_losses += int(row[1])
+  
+    total_months += 1
+    net_total_profit_losses += int(first[1])  
+    #current_profit_losses = int(first[1])
+    previous_change_profit_losses = int(first[1])
+#The changes in "Profit/Losses" over the entire period, and then the average of those changes
+for row in data: 
+    total_months += 1
+    net_total_profit_losses += int(row[1])  
+    current_profit_losses = int(row[1])
+    change = current_profit_losses - previous_change_profit_losses
+    changes_profit_losses.append(change)
+    month_profit_losses.append(row[0])
+    previous_change_profit_losses = int(row[1])
+average_change_profit_losses = sum(changes_profit_losses) / len(changes_profit_losses)
 
-#Calculate average change
-        average_change = sum(net_changes_profit_losses) / len(net_changes_profit_losses)
+#The greatest increase in profits (date and amount) over the entire period
+greatest_increase = max(changes_profit_losses)
+# greatest index
+greatest_index = changes_profit_losses.index(max(changes_profit_losses))
+greatest_month = month_profit_losses[greatest_index]
+
+#The greatest decrease in profits (date and amount) over the entire period
+greatest_decrease = min(changes_profit_losses)
+least_month_index = changes_profit_losses.index(min(changes_profit_losses))
+least_month = month_profit_losses[least_month_index]
+#RESULTS
+output = (
+ f"Financial Analysis\n" 
+ f"-----------------------\n"
+ f"Total Months: {total_months}\n"
+ f"Total: {net_total_profit_losses}\n"
+ f"Average Change: {average_change_profit_losses}\n"
+ f"Greatest Increase in Profits:{greatest_month} {greatest_increase}\n"
+ f"Greatest Decrease in Profits: {least_month} {greatest_decrease}\n"
     
-# Determine the greatest increase and decrease in profits
-if net_changes_profit_losses:
-    max_index = net_changes_profit_losses.index(max(net_changes_profit_losses))
-    min_index = net_changes_profit_losses.index(min(net_changes_profit_losses))
+)
 
-    if max_index < len(list_months_changes):
-        greatest_increase[1] = max(net_changes_profit_losses)
-        greatest_increase[0] = list_months_changes[max_index]
+with open(txtpath, "w") as txtfile:
+    print(output)
+    txtfile.write(output)
 
-    if min_index < len(list_months_changes):
-        greatest_decrease[1] = min(net_changes_profit_losses)
-        greatest_decrease[0] = list_months_changes[min_index]
-else:
-    greatest_increase = ["", 0]
-    greatest_decrease = ["", 0]
-
-
-# Calculate the changes in profit/losses for each month
-for i in range(len(net_changes_profit_losses) - 1):
-    change = net_changes_profit_losses[i] - net_changes_profit_losses[i + 1]
-    net_changes_profit_losses[i] = change
-
-
-# Calculate the average change
-average_change = sum(net_changes_profit_losses) / len(net_changes_profit_losses)
-
-# Determine the greatest increase and decrease in profits
-for i in range(len(net_changes_profit_losses)):
-    if net_changes_profit_losses[i] > greatest_increase[1]:
-        greatest_increase[1] = net_changes_profit_losses[i]
-        greatest_increase[0] = list_months_changes[i]
-
-    if net_changes_profit_losses[i] < greatest_decrease[1]:
-        greatest_decrease[1] = net_changes_profit_losses[i]
-        greatest_decrease[0] = list_months_changes[i]
-
-# Print the results
-print("Financial Analysis")
-print("----------------------------")
-print(f"Total Months: {months}")
-print(f"Total: ${net_total_amount}")
-print(f"Average Change: ${average_change:.2f}")
-print(f"Greatest Increase in Profits: {greatest_increase[0]} (${greatest_increase[1]})")
-print(f"Greatest Decrease in Profits: {greatest_decrease[0]} (${greatest_decrease[1]})")
-
-
-
-
-
-
-
-
-    
-
-
-
-
+#RESULTS
+#Financial Analysis
+#----------------------------
+#Total Months: 86
+#Total: $22564198
+#Average Change: $-8311.11
+#Greatest Increase in Profits: Aug-16 ($1862002)
+#Greatest Decrease in Profits: Feb-14 ($-1825558)

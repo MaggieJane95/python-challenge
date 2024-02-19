@@ -3,64 +3,68 @@ import os
 csvpath = os.path.join('Resources', 'election_data.csv')
 txtpath = os.path.join('analysis', 'election_analysis.txt')
 
-#Define my variables
-votes_cast = 0
-candidates_list = []
-votes_per_candidate = {}
-percentage_per_candidate = {}
-winner = ""
+#Read the CVS File / Skip header
+with open(csvpath) as csvfile:
+    csvreader = csv.reader(csvfile, delimiter=',')
+    csv_header = next(csvreader)
+    #print(f"Header: {csv_header}")
 
-#Read the File and Skip Header**
-with open(csvpath, 'r') as csvfile:
-    csvreader = csv.reader(csvfile)
-    header = next(csvreader)
-
-
-    #The total number of votes cast
+# Define my variables
+    total_votes_cast = 0
+    all_candidates = []
+    candidate_votes = {}
+    
+# The total number of votes cast
     for row in csvreader:
-        votes_cast += 1
-      
-
-#A complete list of candidates who received votes
+        total_votes_cast += 1
+        
+        # A complete list of candidates who received votes
         candidate = row[2]
-        if candidate not in candidates_list:
-            candidates_list.append(candidate)
-    print("List of candidates", candidates_list)
+        if candidate not in all_candidates:
+            all_candidates.append(candidate)
+            candidate_votes[candidate] = 0
+        candidate_votes[candidate] += 1
 
-#Count the number of votes per candidate
-    if candidate not in votes_per_candidate:
-        votes_per_candidate[candidate] = 1
-    else: votes_per_candidate[candidate] += 1
+    #Determine Winner based on highest number of votes
+    winner = max(candidate_votes, key=candidate_votes.get)      
 
-#The percentage of votes each candidate won
-for candidate, votes in votes_per_candidate.items():
-    if votes == 0:
-        percentage_per_candidate[candidate] = 0
-    else: percentage_per_candidate[candidate] = (votes / votes_cast) *100
-print int:("percentage_per_candidate")
+    #Percentage Per Candidate
+    percentage_per_candidate = {
+        candidate: (votes / total_votes_cast) * 100 for candidate, 
+        votes in candidate_votes.items()
+    }
 
-
-        
-
-        
-
-#The total number of votes each candidate won
-
-#The winner of the election based on popular vote
-        
-
-#print(votes_cast)
-output = (
-    f"Election Results\n"
-    f"------------------------\n"
-    f"Total Votes: {votes_cast}\n"
+    output = (
+    f"Election Results\n" 
+    f"-----------------------\n"
+    f"Total Votes: {total_votes_cast}\n"
     f"------------------------\n"
     
-)
-with open(txtpath, 'w') as txtfile:
-    txtfile.write(output)
+    )
+    with open(txtpath, "w") as txtfile:
+        txtfile.write(output)
+        print(output)
+   
+        for candidate in all_candidates:
+            votes = candidate_votes[candidate]
+            percentage = percentage_per_candidate[candidate]
+            result = f"{candidate}: {percentage:.3f}% ({votes})\n"
+            txtfile.write(result)
+            print(result)
+       
+        txtfile.write("-----------------------\n")
+        txtfile.write(f"Winner:  {winner}\n")
+        txtfile.write("-----------------------\n")
+        print("-----------------------\n")
+        print(f"Winner:  {winner}\n")
+        print("-----------------------\n")
+ 
 
-    print(output)
+   
+
+
+
+#The winner of the election based on popular vote
 # Election Results
 # -------------------------
 # Total Votes: 369711
